@@ -171,28 +171,28 @@ void print_gif(int n, Image& base) {
   f_name += ".bmp";
   std::ofstream out(f_name);
 
-  int a = 0, 
-      b = 0,
+  int a = base.w / 2, 
+      b = base.h / 2,
       r = n + 1;
 
   for(int i = 0; i < 54; i++) out << base.header[i];
 
   for(int i = 0; i < base.size(); i++) {
-    int x  = i % base.w - base.w / 2;
-    int y  = i / base.w - base.h / 2;
-    int dx = x - a,
-        dy = y - b;
+    int   x     = i % base.w;
+    int   y     = i / base.w;
+    int   dx    = x - a,
+          dy    = y - b;
 
-    float dist          = dx * dx + dy * dy;
-    float r_pr          = dist / r;
-    unsigned char red   = r_pr * 255,
-        green           = r_pr * r_pr * 100,
-        blue            = r_pr / 2 * 24 + 100 % 255;
+    float dist  = dx * dx + dy * dy;
+    float r_pr  = (dist + 1) / r;
+    uchar red   = r_pr * 200 + 55,
+          green = r_pr * 0,
+          blue  = r_pr * 0;
       
-    out << green << blue << red;
+    out << blue << green << red;
   }
 
-  for (unsigned char u : base.excess) out << u;
+  for (uchar u : base.excess) out << u;
 
   out.close();
 } 
@@ -208,7 +208,7 @@ int main() {
 
   print_flag(blank_flag);
   
-  for(int i = 0; i < 800; i++) {
+  for(int i = 000; i < 500; i++) {
     print_gif(i, blank);
   }
 
