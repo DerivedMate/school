@@ -84,13 +84,16 @@ bool are_pixels_eq(pixelsT& px, int i, int j) {
   return eq;
 }
 
-bool is_symmetric(pixelsT pxs, int size, int w, int h) {
-  for(int i = 0; i < size/2; i++) {
+bool is_symmetric(Image& img) {
+  int w = img.w;
+  int h = img.h;
+
+  for(int i = 0; i < img.size() / 2; i++) {
     int y = i / w;
     int x = i % w;
     int j = (h - y - 1) * w + x;
 
-    if(!are_pixels_eq(pxs, i, j)) {
+    if(!are_pixels_eq(img.pixels, i, j)) {
       return false;
     };
   }
@@ -106,47 +109,51 @@ bool is_bnw(Image& img) {
   return true;
 }
 
-void print_gradient(headerT headerT, excessT& excess, int w, int h, int size) {
+void print_gradient(Image& base) {
   std::ofstream out("gradient.bmp");
+  int w = base.w;
+  int h = base.h;
   // print the header
-  for(int i = 0; i < 54; i++) out << headerT[i];
+  for(int i = 0; i < 54; i++) out << base.header[i];
 
-  for(int i = 0; i < size; i ++) {
+  for(int i = 0; i < base.size(); i ++) {
     int    x      = i % w;
     int    y      = i / w;
-    int    a      = w/2;
-    int    b      = h/2;
+    int    a      = w / 2;
+    int    b      = h / 2;
     int    x_r    = x - a;
     int    y_r    = y - b;
 
-    double s      = std::abs(double(x_r*y_r) / double((w-1)*(h-1)));
+    double s      = std::abs(double(x_r * y_r) / double((w - 1) * (h - 1)));
            s      = std::cbrt(s);
     double red0   = 252, red1   = 3  ;
     double green0 = 219, green1 = 252; 
     double blue0  = 3  , blue1  = 248;
 
-    uchar  red    = s * (red1   - red0)   + red0,
+    uchar  red    = s * (red1   - red0  ) + red0  ,
            green  = s * (green1 - green0) + green0,
-           blue   = s * (blue1  - blue0)  + blue0;
+           blue   = s * (blue1  - blue0 ) + blue0 ;
 
     out << blue << green << red;
   }
 
   // print the rest of the input file
-  for(uchar u : excess) out << u;
+  for(uchar u : base.excess) out << u;
 
   out.close();
 }
 
-void print_flag(std::ofstream& out, pixelsT px, headerT headerT, excessT& excess, int w, int h, int size) {
+void print_flag(Image& base) {
+  std::ofstream out("out.bmp");
+
   // print the header
-  for(int i = 0; i < 54; i++) out << headerT[i];
+  for(int i = 0; i < 54; i++) out << base.header[i];
 
   // print the flag
-  for(int i = 0; i < size; i++) {
-    int y = i / w;
+  for(int i = 0; i < base.size(); i++) {
+    int y = i / base.w;
     
-    if(y < h / 2) {
+    if(y < base.h / 2) {
       out << mn << mn << mx;
     } else {
       out << mx << mx << mx;
@@ -154,10 +161,11 @@ void print_flag(std::ofstream& out, pixelsT px, headerT headerT, excessT& excess
   }
 
   // print the rest of the input file
-  for(uchar u : excess) out << u;
+  for(uchar u : base.excess) out << u;
+  out.close();
 }
 
-void print_gif(int n, int w, int h, int size, headerT headerT, excessT& excess) {
+void print_gif(int n, Image& base) {
   std::string f_name = "./gif-src/part";
   f_name += std::to_string(n);
   f_name += ".bmp";
@@ -167,11 +175,11 @@ void print_gif(int n, int w, int h, int size, headerT headerT, excessT& excess) 
       b = 0,
       r = n + 1;
 
-  for(int i = 0; i < 54; i++) out << headerT[i];
+  for(int i = 0; i < 54; i++) out << base.header[i];
 
-  for(int i = 0; i < size; i++) {
-    int x  = i % w - w / 2;
-    int y  = i / w - h / 2;
+  for(int i = 0; i < base.size(); i++) {
+    int x  = i % base.w - base.w / 2;
+    int y  = i / base.w - base.h / 2;
     int dx = x - a,
         dy = y - b;
 
@@ -184,7 +192,7 @@ void print_gif(int n, int w, int h, int size, headerT headerT, excessT& excess) 
     out << green << blue << red;
   }
 
-  for (unsigned char u : excess) out << u;
+  for (unsigned char u : base.excess) out << u;
 
   out.close();
 } 
@@ -193,19 +201,18 @@ int main() {
   Image input("./inp2.bmp");
   Image blank("./blank.bmp");
   Image blank_flag("./blank_flag.bmp");
-  std::ofstream out("out.bmp");
 
   printf("%ix%i : %i\n", input.w, input.h, input.size());
-  printf("symmetric: %s\n", (is_symmetric(input.pixels, input.size(), input.w, input.h) ? "yep" : "nope"));
+  printf("symmetric: %s\n", (is_symmetric(input) ? "yep" : "nope"));
   printf("black-n-white: %s\n", is_bnw(input) ? "yep" : "nope");
 
-  print_flag(out, blank_flag.pixels, blank_flag.header, blank_flag.excess, blank_flag.w, blank_flag.h, blank_flag.size());
+  print_flag(blank_flag);
   
   for(int i = 0; i < 800; i++) {
-    print_gif(i, blank.w, blank.h, blank.size(), blank.header, blank.excess);
+    print_gif(i, blank);
   }
 
-  print_gradient(blank.header, blank.excess, blank.w, blank.h, blank.size());
+  print_gradient(blank);
 
   return 0;
 }
