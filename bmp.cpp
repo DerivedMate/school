@@ -84,16 +84,25 @@ bool are_pixels_eq(pixelsT& px, int i, int j) {
   return eq;
 }
 
-bool is_symmetric(pixelsT pixelsT, int size, int w, int h) {
+bool is_symmetric(pixelsT pxs, int size, int w, int h) {
   for(int i = 0; i < size/2; i++) {
     int y = i / w;
     int x = i % w;
     int j = (h - y - 1) * w + x;
 
-    if(!are_pixels_eq(pixelsT, i, j)) {
+    if(!are_pixels_eq(pxs, i, j)) {
       return false;
     };
   }
+  return true;
+}
+
+bool is_bnw(Image& img) {
+  for(Pixel& p : img.pixels) {
+    if(p.r != p.g && p.g != p.b) 
+      return false;
+  }
+
   return true;
 }
 
@@ -173,11 +182,9 @@ void print_gif(int n, int w, int h, int size, headerT headerT, excessT& excess) 
         blue            = r_pr / 2 * 24 + 100 % 255;
       
     out << green << blue << red;
-    
   }
 
   for (unsigned char u : excess) out << u;
-  
 
   out.close();
 } 
@@ -188,9 +195,9 @@ int main() {
   Image blank_flag("./blank_flag.bmp");
   std::ofstream out("out.bmp");
 
-  std::cout << input.w << "x" << input.h << " : " << input.size() << std::endl;
-  std::cout << "symmetric: " << (is_symmetric(input.pixels, input.size(), input.w, input.h) ? "yep" : "no") << std::endl;
-
+  printf("%ix%i : %i\n", input.w, input.h, input.size());
+  printf("symmetric: %s\n", (is_symmetric(input.pixels, input.size(), input.w, input.h) ? "yep" : "nope"));
+  printf("black-n-white: %s\n", is_bnw(input) ? "yep" : "nope");
 
   print_flag(out, blank_flag.pixels, blank_flag.header, blank_flag.excess, blank_flag.w, blank_flag.h, blank_flag.size());
   
