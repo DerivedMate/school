@@ -197,8 +197,8 @@ void print_gif(int n, Image& base) {
   out.close();
 } 
 
-int main() {
-  Image input("./inp2.bmp");
+int main(int argc, char** argv) {
+  Image input(argv[1]);
   Image blank("./blank.bmp");
   Image blank_flag("./blank_flag.bmp");
 

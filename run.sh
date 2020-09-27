@@ -10,7 +10,7 @@ if [ "${len}" -gt 0 ] ; then
 fi;
 
 FILE="./exe.o";
-g++ -o $FILE $1 && chmod +x $FILE && $FILE;
+g++ -o $FILE $1 && chmod +x $FILE && $FILE $2;
 
 echo
 cd gif-src;
