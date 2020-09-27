@@ -34,7 +34,7 @@ void read_header(std::ifstream& f, uchar* header) {
 void read_pixels(std::ifstream& f, pixelsT& pixels, int size) {
   for(int i = 0; i < size; i++) {
     uchar g, b, r;
-    f >> g >> b >> r;
+    f >> b >> g >> r;
     Pixel p(r, g, b);
 
     pixels.push_back(p);
